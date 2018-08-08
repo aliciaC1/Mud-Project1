@@ -691,10 +691,19 @@
 
         var storage = firebase.storage();
 
+            // Attach an asynchronous callback to read the data at our posts reference
+            database.ref().on("value", function(snapshot) {
+                console.log(snapshot.val());
+            }, function (errorObject) {
+                console.log("The read failed: " + errorObject.code);
+            });
+
         // Create a storage reference from our storage service
         var storageRef = storage.ref();
         
+        //********************************************************* */
         // Loop through the names of the images from the db
+        // make sure that the array exists before looping through
         for(var i=0; i<imageArray.length; i++){
             // cycle through and get back all image from the db
             // and also create and append new divs for photos
@@ -710,7 +719,7 @@
                     //This is the base64 string back from the db
                     responseBase64 = xhrFirebase.response;
                     // console.log(responseBase64);
-                    
+
                     var galleryRow = $(".galleryRow");
     
                     var parentDiv = $("<div>");
@@ -752,6 +761,16 @@
     function appendPicToGallery(){
 
         var storage = firebase.storage();
+        // console.log(database);
+        // console.log(storage);
+
+        //this will give back everything from the db
+        database.ref().on("value", function(snapshot) {
+            console.log(snapshot.val());
+        }, function (errorObject) {
+            console.log("The read failed: " + errorObject.code);
+        });
+
 
         // Create a storage reference from our storage service
         var storageRef = storage.ref();
