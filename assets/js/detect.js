@@ -57,6 +57,8 @@
         messagingSenderId: "350533286927"
     };
     firebase.initializeApp(config);
+    var database = firebase.database();
+
 
     //********************************************************************** */
     //********************************************************************** */
@@ -298,6 +300,21 @@
                             anger = resultObject.faces["0"].attributes.emotion.anger;
                             disgust = resultObject.faces["0"].attributes.emotion.disgust;
                             surprise = resultObject.faces["0"].attributes.emotion.surprise;
+
+                            //Send Current Mood To DB
+
+                            
+                            database.ref().set({
+                                currentMood: [{
+                                    happiness: happiness,
+                                    sadness: sadness,
+                                    fear: fear,
+                                    anger: anger,
+                                    disgust: disgust,
+                                    surprise: surprise,
+                                    dateAdded: firebase.database.ServerValue.TIMESTAMP
+                                }]
+                            });
 
                             // console.log("happiness: " + happiness);
                             // console.log("sadness: " + sadness);
