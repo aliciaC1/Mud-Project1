@@ -62,6 +62,8 @@
 
     //********************************************************************** */
     //********************************************************************** */
+    //on start get all images from the db
+    getPicsForGallery();
 
     //#region Face++ Code
 
@@ -628,7 +630,7 @@
 
         // Add image names to array
         imageArray.push(imageName);
-        console.log(imageArray);
+        // console.log(imageArray);
 
         //Upload a File
         var task = storageRef.put(blob);
@@ -690,26 +692,36 @@
     function getPicsForGallery(){
 
         var storage = firebase.storage();
-
-            // Attach an asynchronous callback to read the data at our posts reference
-            database.ref().on("value", function(snapshot) {
-                console.log(snapshot.val());
-            }, function (errorObject) {
-                console.log("The read failed: " + errorObject.code);
-            });
+        var imageArrayFromDb;
+        var data;
 
         // Create a storage reference from our storage service
         var storageRef = storage.ref();
-        
+
+        //this will give back everything from the db
+        database.ref().on("value", function(snapshot) {
+            data = snapshot.val();
+            console.log(data);
+            //this is the Array *****
+            imageArrayFromDb = data.imageArray;
+            console.log(imageArrayFromDb);
+
+        }, function (errorObject) {
+            console.log("The read failed: " + errorObject.code);
+        });
+
+        // ************  Sequence Issue Bug ***********************//
+        // hits the loop berfore above returns the array. need a .then(){}
+
         //********************************************************* */
         // Loop through the names of the images from the db
         // make sure that the array exists before looping through
-        for(var i=0; i<imageArray.length; i++){
+        for(var i=0; i<imageArrayFromDb.length; i++){
             // cycle through and get back all image from the db
             // and also create and append new divs for photos
             // based on imageArray.
 
-            storageRef.child('Emotion Photos/' + imageArray[i]).getDownloadURL().then(function(url) {
+            storageRef.child('Emotion Photos/' + imageArrayFromDb[i]).getDownloadURL().then(function(url) {
                 var responseBase64;
     
                 var xhrFirebase = new XMLHttpRequest();
@@ -761,16 +773,10 @@
     function appendPicToGallery(){
 
         var storage = firebase.storage();
+        var data;
+        var imageArrayFromDb;
         // console.log(database);
         // console.log(storage);
-
-        //this will give back everything from the db
-        database.ref().on("value", function(snapshot) {
-            console.log(snapshot.val());
-        }, function (errorObject) {
-            console.log("The read failed: " + errorObject.code);
-        });
-
 
         // Create a storage reference from our storage service
         var storageRef = storage.ref();
