@@ -710,7 +710,7 @@
         //this will give back everything from the db
         database.ref().on("value", function(snapshot) {
             data = snapshot.val();
-            console.log(data);
+            // console.log(data);
             //this is the Array *****
             imageArrayFromDb = data.imageArray;
             console.log(imageArrayFromDb);
