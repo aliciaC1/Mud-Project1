@@ -74,8 +74,16 @@
     // vendor prefix
     window.URL = window.URL || window.webkitURL;
     navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia ||
-                              navigator.mozGetUserMedia || navigator.msGetUserMedia;
+    navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
+
+    $("#view-dashboard").on("click", function(event) {
+        event.preventDefault();
+        window.location.replace("./mood.html");
+    });
+    
+    // intialize all Materalize js functions
+    M.AutoInit();
 
     function makeDetector(el, options) {
         var container = $(el);
@@ -641,7 +649,7 @@
 
         //Send Current Mood To REALTIME DB
         database.ref().set({
-            currentMood: [{
+            currentMood: {
                 happiness: happiness,
                 sadness: sadness,
                 fear: fear,
@@ -649,14 +657,8 @@
                 disgust: disgust,
                 surprise: surprise,
                 dateAdded: firebase.database.ServerValue.TIMESTAMP
-            }],
+            },
 
-            // ***************  BUG  *************************//
-            //Send iamgeArray To REALTIME DB
-            // This is overriding the entire parent everytime.. need constant parent
-            // and just push array elements into it.
-
-            //DONT give it the entire array.. just give it the current name to add.
             imageArray: imageArray
         });
     }
