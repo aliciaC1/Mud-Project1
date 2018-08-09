@@ -66,6 +66,8 @@
     //********************************************************************** */
     //on start get all images from the db
     // get image array back from DB before loop function to display HTML
+    //
+    //CURRENT EMOTION SHOULD NOT GO TO SERO ON START
     getImageArrayFromDB();
     setTimeout(getPicsForGallery, 1000);
 
@@ -573,15 +575,19 @@
                 imageName = "image_" + photoCounter;
                 // console.log("Photo Counter Index: " + photoCounter);
 
-                sendPicToDB();
+                if(image64 != undefined){
+                    sendPicToDB();
+
+                    // getPicFromDB();
+                    // getPicsForGallery();
+                    // should use then, or callback
+                    setTimeout(appendPicToGallery, 1000);
+                    photoCounter++;
+                    console.log("The DB has this many photos: " + photoCounter);
+                    xhr.send(fd);
+                }
             
-                // getPicFromDB();
-                // getPicsForGallery();
-                // should use then, or callback
-                setTimeout(appendPicToGallery, 1000);
-                photoCounter++;
-                console.log("The DB has this many photos: " + photoCounter);
-                xhr.send(fd);
+
 
             }else if (options.type === 'url') {
                 xhr.open('POST', API_URL + '/detect');
@@ -636,12 +642,9 @@
         imageArray.push(imageName);
         // console.log(imageArray);
 
-        //Upload a File to STORAGE
-        var task = storageRef.put(blob);
-
         //Send Current Mood To REALTIME DB
         database.ref().set({
-            currentMood: [{
+            currentMood: {
                 happiness: happiness,
                 sadness: sadness,
                 fear: fear,
@@ -649,16 +652,25 @@
                 disgust: disgust,
                 surprise: surprise,
                 dateAdded: firebase.database.ServerValue.TIMESTAMP
-            }],
+            },
 
-            // ***************  BUG  *************************//
-            //Send iamgeArray To REALTIME DB
-            // This is overriding the entire parent everytime.. need constant parent
-            // and just push array elements into it.
-
-            //DONT give it the entire array.. just give it the current name to add.
-            imageArray: imageArray
+            imageArray: imageArray,
         });
+
+        // database.ref().push({
+        //     imageArrayParent: {
+        //         image: {
+        //             imageName: imageName,
+        //             happiness: happiness,
+        //             sadness: sadness,
+        //             fear: fear,
+        //             anger: anger,
+        //             disgust: disgust,
+        //             surprise: surprise,
+        //             dateAdded: firebase.database.ServerValue.TIMESTAMP
+        //         },
+        //     },
+        // });
     }
 
     //#region get single image back and put at specific location
@@ -708,10 +720,10 @@
         //this will give back everything from the db
         database.ref().on("value", function(snapshot) {
             data = snapshot.val();
-            console.log(data);
+            // console.log(data);
             //this is the Array *****
             imageArrayFromDb = data.imageArray;
-            console.log(imageArrayFromDb);
+            // console.log(imageArrayFromDb);
 
         }, function (errorObject) {
             console.log("The read failed: " + errorObject.code);
@@ -724,25 +736,21 @@
         // imageArrayFromDb needs to not be undefined
         if(imageArrayFromDb != undefined){
             imageArray = imageArrayFromDb;
-            console.log("Image Array in not undefined");
+            // console.log("Image Array in not undefined");
         }else {
             imageArray = [];
-            console.log("Image Array is undefined, so now making it an empty array");
+            // console.log("Image Array is undefined, so now making it an empty array");
         };
         //******************************************************************************** */
 
         if(imageArrayFromDb != undefined){
             photoCounter = imageArrayFromDb.length;
-            console.log("The DB has this many photos: " + photoCounter);
+            console.log("Realtime DB imageArray has this many photos: " + photoCounter);
 
             var storage = firebase.storage();
             // Create a storage reference from our storage service
             var storageRef = storage.ref();
-    
-            // ************  Sequence Issue Bug ***********************//
-            // hits the loop berfore above returns the array. need a .then(){}
-    
-            //********************************************************* */
+
             // Loop through the names of the images from the db
             // make sure that the array exists before looping through
             for(var i=0; i<imageArrayFromDb.length; i++){
@@ -805,10 +813,6 @@
     function appendPicToGallery(){
 
         var storage = firebase.storage();
-        var data;
-        var imageArrayFromDb;
-        // console.log(database);
-        // console.log(storage);
 
         // Create a storage reference from our storage service
         var storageRef = storage.ref();
