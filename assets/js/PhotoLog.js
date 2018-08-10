@@ -17,7 +17,7 @@
     };
     firebase.initializeApp(config);
     var database = firebase.database();
-    
+
 
     var photoCounter = 0;
     var imageArray = [];
@@ -87,31 +87,22 @@
     
                         var galleryRow = $(".grid");
         
-                        var parentDiv = $("<div>");
-                        parentDiv.attr("class", "col s12 m2");
-                        galleryRow.append(parentDiv);
-                        var cardDiv = $("<div>");
-                        cardDiv.attr("class", "card");
-                        parentDiv.append(cardDiv);
-                        var cardImageDiv = $("<div>");
-                        cardImageDiv.attr("class", "card-image");
-                        cardDiv.append(cardImageDiv);
                         var imgTag = $("<img>");
                         //give it an id to find later
                         imgTag.attr("id", imageArray[i]);
                         //give it the base64 string from db
                         imgTag.attr("src", responseBase64);
-                        cardImageDiv.append(imgTag);
-                        var cardTitleDiv = $("<div>");
-                        cardTitleDiv.attr("class", "card-title");
-                        cardTitleDiv.attr("style", "font-size: 16px;");
-                        //give the card some text
-                        cardTitleDiv.text(imageArray[i]);
-                        cardImageDiv.append(cardTitleDiv);
-    
-    
-                        // var img = document.getElementById('myimg');
-                        // img.src = responseBase64;
+                        galleryRow.append(imgTag);
+                        var labelDiv = $("<label>");
+                        galleryRow.append(labelDiv);
+                        var inputTag = $("<input>");
+                        inputTag.attr("type", "checkbox");
+                        labelDiv.append(inputTag);
+                        var spanTag = $("<span>");
+                        spanTag.attr("class","new badge white");
+                        spanTag.attr("id","emotion-state");
+                        labelDiv.append(spanTag);
+                        
                     };
                     xhrFirebase.open('GET', url);
                     xhrFirebase.send();
