@@ -21,9 +21,10 @@
 
 
     var mainEmotion = "";
+    var photoCounter = 0;
     var imageName;
     var photoCounter = 0;
-    var imageArray;
+    var imageArray = [];
     var imageArrayFromDb;
 
     //Get HTML Objects
@@ -64,18 +65,14 @@
 
     //********************************************************************** */
     //********************************************************************** */
+
     //on start get all images from the db
     // get image array back from DB before loop function to display HTML
     getImageArrayFromDB();
     setTimeout(getPicsForGallery, 1000);
 
+
     //#region Face++ Code
-
-    // vendor prefix
-    window.URL = window.URL || window.webkitURL;
-    navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia || navigator.msGetUserMedia;
-
 
     $("#view-dashboard").on("click", function(event) {
         event.preventDefault();
@@ -84,6 +81,12 @@
     
     // intialize all Materalize js functions
     M.AutoInit();
+
+    // vendor prefix
+    window.URL = window.URL || window.webkitURL;
+    navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
 
     function makeDetector(el, options) {
         var container = $(el);
@@ -315,6 +318,21 @@
                             disgust = resultObject.faces["0"].attributes.emotion.disgust;
                             surprise = resultObject.faces["0"].attributes.emotion.surprise;
 
+                            //Send Current Mood To DB
+
+                            
+                            database.ref().set({
+                                currentMood: {
+                                    happiness: happiness,
+                                    sadness: sadness,
+                                    fear: fear,
+                                    anger: anger,
+                                    disgust: disgust,
+                                    surprise: surprise,
+                                    dateAdded: firebase.database.ServerValue.TIMESTAMP
+                                },
+                                imageArray: imageArray
+                            });
 
                             // console.log("happiness: " + happiness);
                             // console.log("sadness: " + sadness);
@@ -588,7 +606,6 @@
                 // should use then, or callback
                 setTimeout(appendPicToGallery, 1000);
                 photoCounter++;
-                console.log("The DB has this many photos: " + photoCounter);
                 xhr.send(fd);
 
             }else if (options.type === 'url') {
@@ -629,77 +646,21 @@
         });
     });
 
-    // make empty array for all images
-    // push image names into the array when you puysh them off to the database,
-    // so that we can grab the back from the db later.
-
-
     function sendPicToDB(){
+        
+        console.log("image name: " + imageName);
 
         //Create Storage Ref --- give it a file name
         var storageRef = firebase.storage().ref("Emotion Photos/" + imageName);
 
         // Add image names to array
-        // This is overriding and deleting other array elements
         imageArray.push(imageName);
-        // console.log(imageArray);
+        console.log("This is the image array to send to db");
+        console.log(imageArray);
 
-        //Upload a File to STORAGE
-        var task = storageRef.put(blob);
-
-        //Send Current Mood To REALTIME DB
-        database.ref().set({
-            currentMood: {
-                happiness: happiness,
-                sadness: sadness,
-                fear: fear,
-                anger: anger,
-                disgust: disgust,
-                surprise: surprise,
-                dateAdded: firebase.database.ServerValue.TIMESTAMP
-            },
-
-            imageArray: imageArray
-        });
+        //Upload the Blob to Storage
+        storageRef.put(blob);
     }
-
-    //#region get single image back and put at specific location
-    //GET BACK ONE SPECIFIC IMAGE FROM DB THEN SEND IT SOMEWHERE
-    //SPECIFIC IN THE DOM..
-    // function getPicFromDB(){
-
-    //     var storage = firebase.storage();
-
-    //     // Create a storage reference from our storage service
-    //     var storageRef = storage.ref();
-    //     // var pathReference = storage.ref('Emotion Photos/Adam_Image0');
-
-    //     storageRef.child('Emotion Photos/image_0').getDownloadURL().then(function(url) {
-    //         var responseBase64;
-
-    //         var xhrFirebase = new XMLHttpRequest();
-    //         //want to get text back not a blob
-    //         xhrFirebase.responseType = 'text';
-    //         xhrFirebase.onload = function(event) {
-    //             //This is the base64 string back from the db
-    //             responseBase64 = xhrFirebase.response;
-    //             // console.log(responseBase64);
-
-    //             // ADD base64 from Database to HTML HERE*****
-    //             // This is a sequence issue.. image will be undefined 
-    //             // if you do not wait until you get back the base 64 from the db
-    //             var img = document.getElementById('myimg');
-    //             img.src = responseBase64;
-    //         };
-    //         xhrFirebase.open('GET', url);
-    //         xhrFirebase.send();
-
-    //     }).catch(function(error) {
-    //     // Handle any errors
-    //     });
-
-    // }  
-    //#endregion  
 
     var data;
 
@@ -710,10 +671,13 @@
         //this will give back everything from the db
         database.ref().on("value", function(snapshot) {
             data = snapshot.val();
-            console.log(data);
+            // console.log(data);
             //this is the Array *****
             imageArrayFromDb = data.imageArray;
+            console.log("This is the image Array from realtime DB: ");
             console.log(imageArrayFromDb);
+            // console.log(data);
+
 
         }, function (errorObject) {
             console.log("The read failed: " + errorObject.code);
@@ -740,11 +704,7 @@
             var storage = firebase.storage();
             // Create a storage reference from our storage service
             var storageRef = storage.ref();
-    
-            // ************  Sequence Issue Bug ***********************//
-            // hits the loop berfore above returns the array. need a .then(){}
-    
-            //********************************************************* */
+
             // Loop through the names of the images from the db
             // make sure that the array exists before looping through
             for(var i=0; i<imageArrayFromDb.length; i++){
@@ -870,6 +830,14 @@
 
 
     }
+
+    $("#view-dashboard").on("click", function(event) {
+        event.preventDefault();
+        window.location.replace("./mood.html");
+    });
+ 
+    // intialize all Materalize js functions
+    M.AutoInit();
 
     
     //#region  Need this function but not doing anything..
