@@ -21,7 +21,6 @@
 
 
     var mainEmotion = "";
-    var photoCounter = 0;
     var imageName;
     var photoCounter = 0;
     var imageArray = [];
