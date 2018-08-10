@@ -704,7 +704,7 @@
             var storage = firebase.storage();
             // Create a storage reference from our storage service
             var storageRef = storage.ref();
-            
+
             // Loop through the names of the images from the db
             // make sure that the array exists before looping through
             for(var i=0; i<imageArrayFromDb.length; i++){
@@ -830,6 +830,14 @@
 
 
     }
+
+    $("#view-dashboard").on("click", function(event) {
+        event.preventDefault();
+        window.location.replace("./mood.html");
+    });
+ 
+    // intialize all Materalize js functions
+    M.AutoInit();
 
     
     //#region  Need this function but not doing anything..
