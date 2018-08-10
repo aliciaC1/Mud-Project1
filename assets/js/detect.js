@@ -660,11 +660,6 @@
 
         //Upload the Blob to Storage
         storageRef.put(blob);
-
-        // Send Image Array to Realtime DB
-        // database.ref().set({
-        //     imageArray: imageArray
-        // });
     }
 
     var data;
@@ -709,11 +704,7 @@
             var storage = firebase.storage();
             // Create a storage reference from our storage service
             var storageRef = storage.ref();
-    
-            // ************  Sequence Issue Bug ***********************//
-            // hits the loop berfore above returns the array. need a .then(){}
-    
-            //********************************************************* */
+            
             // Loop through the names of the images from the db
             // make sure that the array exists before looping through
             for(var i=0; i<imageArrayFromDb.length; i++){
