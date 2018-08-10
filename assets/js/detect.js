@@ -23,6 +23,9 @@
     var mainEmotion = "";
     var photoCounter = 0;
     var imageName;
+    var photoCounter = 0;
+    var imageArray = [];
+    var imageArrayFromDb;
 
     //Get HTML Objects
     var happinessHTML = $(".happiness");
@@ -62,6 +65,12 @@
 
     //********************************************************************** */
     //********************************************************************** */
+
+    //on start get all images from the db
+    // get image array back from DB before loop function to display HTML
+    getImageArrayFromDB();
+    setTimeout(getPicsForGallery, 1000);
+
 
     //#region Face++ Code
 
@@ -313,7 +322,7 @@
 
                             
                             database.ref().set({
-                                currentMood: [{
+                                currentMood: {
                                     happiness: happiness,
                                     sadness: sadness,
                                     fear: fear,
@@ -321,7 +330,8 @@
                                     disgust: disgust,
                                     surprise: surprise,
                                     dateAdded: firebase.database.ServerValue.TIMESTAMP
-                                }]
+                                },
+                                imageArray: imageArray
                             });
 
                             // console.log("happiness: " + happiness);
@@ -636,11 +646,6 @@
         });
     });
 
-    // make empty array for all images
-    // push image names into the array when you puysh them off to the database,
-    // so that we can grab the back from the db later.
-    var imageArray = [];
-
     function sendPicToDB(){
         
         console.log("image name: " + imageName);
@@ -650,129 +655,131 @@
 
         // Add image names to array
         imageArray.push(imageName);
+        console.log("This is the image array to send to db");
         console.log(imageArray);
 
-        //Upload a File
-        var task = storageRef.put(blob);
+        //Upload the Blob to Storage
+        storageRef.put(blob);
+
+        // Send Image Array to Realtime DB
+        // database.ref().set({
+        //     imageArray: imageArray
+        // });
     }
 
-    //GET BACK ONE SPECIFIC IMAGE FROM DB THEN SEND IT SOMEWHERE
-    //SPECIFIC IN THE DOM..
-    // function getPicFromDB(){
+    var data;
 
-    //     var storage = firebase.storage();
+    // get image array first. then wait to get the array back before 
+    // looping through the other getPicsFromGallery function
+    function getImageArrayFromDB(){
 
-    //     // Create a storage reference from our storage service
-    //     var storageRef = storage.ref();
-    //     // var pathReference = storage.ref('Emotion Photos/Adam_Image0');
+        //this will give back everything from the db
+        database.ref().on("value", function(snapshot) {
+            data = snapshot.val();
+            // console.log(data);
+            //this is the Array *****
+            imageArrayFromDb = data.imageArray;
+            console.log("This is the image Array from realtime DB: ");
+            console.log(imageArrayFromDb);
+            // console.log(data);
 
-    //     storageRef.child('Emotion Photos/image_0').getDownloadURL().then(function(url) {
-    //         var responseBase64;
 
-    //         var xhrFirebase = new XMLHttpRequest();
-    //         //want to get text back not a blob
-    //         xhrFirebase.responseType = 'text';
-    //         xhrFirebase.onload = function(event) {
-    //             //This is the base64 string back from the db
-    //             responseBase64 = xhrFirebase.response;
-    //             // console.log(responseBase64);
-
-    //             // ADD base64 from Database to HTML HERE*****
-    //             // This is a sequence issue.. image will be undefined 
-    //             // if you do not wait until you get back the base 64 from the db
-    //             var img = document.getElementById('myimg');
-    //             img.src = responseBase64;
-    //         };
-    //         xhrFirebase.open('GET', url);
-    //         xhrFirebase.send();
-
-    //     }).catch(function(error) {
-    //     // Handle any errors
-    //     });
-
-    // }    
+        }, function (errorObject) {
+            console.log("The read failed: " + errorObject.code);
+        });
+    }
     
-    // GET BACK ALL THE IMAGES THAT ARE IN THE imagesArray.
-    // should getthe list back from the db.
-    // could make this not loop through entire array and just create new div for the new image
-    // function getPicsForGallery(){
+    function getPicsForGallery(){
 
-    //     var storage = firebase.storage();
+        //*********************  need to put this chunk here for sequence***************** */
+        // imageArrayFromDb needs to not be undefined
+        if(imageArrayFromDb != undefined){
+            imageArray = imageArrayFromDb;
+            console.log("Image Array in not undefined");
+        }else {
+            imageArray = [];
+            console.log("Image Array is undefined, so now making it an empty array");
+        };
+        //******************************************************************************** */
 
-    //     // Create a storage reference from our storage service
-    //     var storageRef = storage.ref();
-    //     // var pathReference = storage.ref('Emotion Photos/Adam_Image0');
+        if(imageArrayFromDb != undefined){
+            photoCounter = imageArrayFromDb.length;
+            console.log("The DB has this many photos: " + photoCounter);
 
-    //     //********************       FIX THIS       ****************************** */
-    //     //everytime you add a picture it is going to loop through the entire list.
-    //     // We should get the list from the db.. not make the list here.
-    //     // GET DB STORAGE OBJECT BACK
-    //     for(var i=0; i<imageArray.length; i++){
-    //         // cycle through and get back all image from the db
-    //         // and also create and append new divs for photos
-    //         // based on imageArray.
-
-    //         storageRef.child('Emotion Photos/' + imageArray[i]).getDownloadURL().then(function(url) {
-    //             var responseBase64;
+            var storage = firebase.storage();
+            // Create a storage reference from our storage service
+            var storageRef = storage.ref();
     
-    //             var xhrFirebase = new XMLHttpRequest();
-    //             //want to get text back not a blob
-    //             xhrFirebase.responseType = 'text';
-    //             xhrFirebase.onload = function(event) {
-    //                 //This is the base64 string back from the db
-    //                 responseBase64 = xhrFirebase.response;
-    //                 // console.log(responseBase64);
+            // ************  Sequence Issue Bug ***********************//
+            // hits the loop berfore above returns the array. need a .then(){}
     
-    //                 // ADD base64 from Database to HTML HERE*****
-    //                 // This is a sequence issue.. image will be undefined 
-    //                 // if you do not wait until you get back the base 64 from the db
+            //********************************************************* */
+            // Loop through the names of the images from the db
+            // make sure that the array exists before looping through
+            for(var i=0; i<imageArrayFromDb.length; i++){
+                // cycle through and get back all image from the db
+                // and also create and append new divs for photos
+                // based on imageArray.
     
-    //                 //create new divs with image same as bootstrap card.. then five it
-    //                 //the image
-    //                 var galleryRow = $(".galleryRow");
+                storageRef.child('Emotion Photos/' + imageArrayFromDb[i]).getDownloadURL().then(function(url) {
+                    var responseBase64;
+        
+                    var xhrFirebase = new XMLHttpRequest();
+                    //want to get text back not a blob
+                    xhrFirebase.responseType = 'text';
+                    xhrFirebase.onload = function(event) {
+                        //This is the base64 string back from the db
+                        responseBase64 = xhrFirebase.response;
+                        // console.log(responseBase64);
     
-    //                 var parentDiv = $("<div>");
-    //                 parentDiv.attr("class", "col s12 m2");
-    //                 galleryRow.append(parentDiv);
-    //                 var cardDiv = $("<div>");
-    //                 cardDiv.attr("class", "card");
-    //                 parentDiv.append(cardDiv);
-    //                 var cardImageDiv = $("<div>");
-    //                 cardImageDiv.attr("class", "card-image");
-    //                 cardDiv.append(cardImageDiv);
-    //                 var imgTag = $("<img>");
-    //                 //give it an id to find later
-    //                 imgTag.attr("id", imageArray[i]);
-    //                 //give it the base64 string from db
-    //                 imgTag.attr("src", responseBase64);
-    //                 cardImageDiv.append(imgTag);
-    //                 var cardTitleDiv = $("<div>");
-    //                 cardTitleDiv.attr("class", "card-title");
-    //                 cardTitleDiv.attr("style", "font-size: 16px;");
-    //                 //give the card some text
-    //                 cardTitleDiv.text(imageArray[i]);
-    //                 cardImageDiv.append(cardTitleDiv);
-
-
-    //                 // var img = document.getElementById('myimg');
-    //                 // img.src = responseBase64;
-    //             };
-    //             xhrFirebase.open('GET', url);
-    //             xhrFirebase.send();
+                        var galleryRow = $(".galleryRow");
+        
+                        var parentDiv = $("<div>");
+                        parentDiv.attr("class", "col s12 m2");
+                        galleryRow.append(parentDiv);
+                        var cardDiv = $("<div>");
+                        cardDiv.attr("class", "card");
+                        parentDiv.append(cardDiv);
+                        var cardImageDiv = $("<div>");
+                        cardImageDiv.attr("class", "card-image");
+                        cardDiv.append(cardImageDiv);
+                        var imgTag = $("<img>");
+                        //give it an id to find later
+                        imgTag.attr("id", imageArray[i]);
+                        //give it the base64 string from db
+                        imgTag.attr("src", responseBase64);
+                        cardImageDiv.append(imgTag);
+                        var cardTitleDiv = $("<div>");
+                        cardTitleDiv.attr("class", "card-title");
+                        cardTitleDiv.attr("style", "font-size: 16px;");
+                        //give the card some text
+                        cardTitleDiv.text(imageArray[i]);
+                        cardImageDiv.append(cardTitleDiv);
     
-    //         }).catch(function(error) {
-    //         // Handle any errors
-    //         });
-    //     }
+    
+                        // var img = document.getElementById('myimg');
+                        // img.src = responseBase64;
+                    };
+                    xhrFirebase.open('GET', url);
+                    xhrFirebase.send();
+        
+                }).catch(function(error) {
+                // Handle any errors
+                });
+            }
+        }
 
 
-
-    // }
+    }
 
 
     function appendPicToGallery(){
 
         var storage = firebase.storage();
+        var data;
+        var imageArrayFromDb;
+        // console.log(database);
+        // console.log(storage);
 
         // Create a storage reference from our storage service
         var storageRef = storage.ref();
