@@ -1,86 +1,66 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Login Page</title>
+  <head>
+    <meta charset="UTF-8">
+    <title>FirebaseUI Auth Demo</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://www.gstatic.com/firebasejs/5.0/firebase.js"></script>
+    <script src="public/sample-config.js"></script>
+    <script src="public/common.js"></script>
+    <link href="public/style.css" rel="stylesheet" type="text/css" media="screen" />
+    <!-- <script src="dist/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="dist/firebaseui.css" /> -->
+    <script src="https://cdn.firebase.com/libs/firebaseui/3.2.0/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.2.0/firebaseui.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://www.gstatic.com/firebasejs/5.3.0/firebase.js"></script>
-    <script src="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.css" />
-     <!--Import Google Icon Font-->
-     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-     <!-- Compiled and minified CSS -->
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
-     <script
-     src="https://code.jquery.com/jquery-3.1.1.min.js"
-     integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-     crossorigin="anonymous"></script>
-     <link href="./assets/css/style.css" rel="stylesheet">
-</head>
-<body>
-        <a href="#" class="brand-logo"><img id ="logo-img"src="./assets/images/mudlogowhite2.png"></a>
-
-        <div class="row">
-                <div class="col s12 m9 l10">
-                  <div id="introduction" class="section scrollspy">
-                    <h2>Welcome to Mud</h2>
-                  </div>
+    <link rel="shortcut icon" type="image/png" href="./assets/images/mudlogoblkwhite.png">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://use.fontawesome.com/fc6b1f5629.js"></script>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <link href="./assets/css/style.css" rel="stylesheet">
+  </head>
+  <body>
+      <img class ="movement2" src="./assets/images/3iRE.gif">
+    <div id="container">
+    <img id ="logo-index"src="./assets/images/mudlogowhite2.png">
+    <h4><STRONG>Müd : <em>/myːt/</em></STRONG></h4>
+    <h5>
+        A web application that enables users to keep a visual emotional diary of their daily emotions through photos, tags and comments.
+        We offer curated media content based on user's emotional data to offer a more interactive, unique user experience. </h5>
+        <br>
+      <div id="loading">Loading...</div>
+      <div id="loaded" class="hidden">
+        <div id="main">
+          <div id="user-signed-in" class="hidden">
+            <div id="user-info">
+              <div id="photo-container">
+                <img id="photo">
+              </div>
+              <div id="name"></div>
+              <div id="email"></div>
+              <div id="phone"></div>
+              <div id="is-new-user"></div>
+              <div class="clearfix"></div>
+            </div>
+            <p>
+              <button id="sign-out">Sign Out</button>
+              <button id="delete-account">Delete account</button>
+            </p>
+          </div>
+          <div id="user-signed-out" class="hidden">
+            <h4>You are signed out.</h4>
             
-                  <div id="concept" class="section scrollspy">
-                       
-                    <div class="row">
-                      <form class="col s12">
-                        <div class="row">
-                          <div class="input-field col s6">
-                            <input placeholder="Placeholder" id="first_name" type="text" class="validate">
-                            <label for="first_name">First Name</label>
-                          </div>
-                          <div class="input-field col s6">
-                            <input id="last_name" type="text" class="validate">
-                            <label for="last_name">Last Name</label>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="input-field col s12">
-                            <input id="password" type="password" class="validate">
-                            <label for="password">Password</label>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="input-field col s12">
-                            <input id="email" type="email" class="validate">
-                            <label for="email">Email</label>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                  
-                  <div id="apis" class="section scrollspy">
-                      <h2>About Müd</h2>
-                  </div>
-                  <div id="apis" class="section scrollspy">
-                        <h2>Demo</h2>
-                    </div>
-                </div>
-                <div class="col hide-on-small-only m3 l2">
-                        <ul class="section table-of-contents">
-                          <li><a href="#introduction">Welcome</a></li>
-                          <li><a href="#structure">Sign In</a></li>
-                          <li><a href="#apis">About Müd</a></li>
-                          <li><a href="#creators">Demo</a></li>
-                        </ul>
-                      </div>
-  
-   
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>   
-    <script src="./assets/js/fireBase.js"></script>
-    <script src="./assets/js/login.js"></script>
-
- 
-   </div>
-</body>
+            <div id="firebaseui-spa">
+            
+              <div id="firebaseui-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="public/app.js"></script>
+  </body>
 </html>
