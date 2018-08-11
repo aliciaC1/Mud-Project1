@@ -383,7 +383,7 @@ $(document).ready(function(){
   M.AutoInit();
 // #endregion materalize 
 // #region Mood Board Draggable / resizeable functions 
-//  $('.mood-container').hide();
+ $('.mood-container').hide();
 
     $('.resizeDiv')
 	.draggable()
